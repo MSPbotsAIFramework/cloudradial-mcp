@@ -56,7 +56,7 @@ def register(mcp: FastMCP, client_factory: Callable[[], CloudRadialClient | None
     @mcp.tool()
     async def cloudradial_create_flexible_asset(
         flexible_asset_type_id: int,
-        traits: dict,
+        traits: dict[str, object],
         organization_id: str | None = None,
         archived: bool | None = None,
         type: str = "flexible-assets",
@@ -89,7 +89,7 @@ def register(mcp: FastMCP, client_factory: Callable[[], CloudRadialClient | None
             return f"Error: {e}"
 
     @mcp.tool()
-    async def cloudradial_update_flexible_assets(assets: list) -> str:
+    async def cloudradial_update_flexible_assets(assets: list[dict]) -> str:
         """Bulk-update flexible assets.
 
         API: PATCH /compatibility/flexible_assets
@@ -174,7 +174,7 @@ def register(mcp: FastMCP, client_factory: Callable[[], CloudRadialClient | None
         id: int,
         flexible_asset_type_id: str | None = None,
         archived: str | None = None,
-        traits: dict | None = None,
+        traits: dict[str, object] | None = None,
         organization_id: str | None = None,
         type: str = "flexible-assets",
     ) -> str:
@@ -213,7 +213,7 @@ def register(mcp: FastMCP, client_factory: Callable[[], CloudRadialClient | None
             return f"Error: {e}"
 
     @mcp.tool()
-    async def cloudradial_create_organization_flexible_assets(org_id: int, assets: list) -> str:
+    async def cloudradial_create_organization_flexible_assets(org_id: int, assets: list[dict]) -> str:
         """Bulk-create flexible assets under a specific organization (company).
 
         API: POST /compatibility/organizations/{orgId}/relationships/flexible_assets

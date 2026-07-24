@@ -45,7 +45,7 @@ def register(mcp: FastMCP, client_factory: Callable[[], CloudRadialClient | None
             return f"Error: {e}"
 
     @mcp.tool()
-    async def cloudradial_create_feedback(feedback: dict) -> str:
+    async def cloudradial_create_feedback(feedback: dict[str, object]) -> str:
         """Submit a feedback/CSAT record (e.g. from an external PSA ticket-closure survey).
 
         API: POST /api/beta/feedback

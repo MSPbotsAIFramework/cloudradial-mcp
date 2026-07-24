@@ -61,7 +61,7 @@ def register(mcp: FastMCP, client_factory: Callable[[], CloudRadialClient | None
         description: str | None = None,
         icon: str | None = None,
         show_in_menu: bool | None = None,
-        fields: list | None = None,
+        fields: list[dict] | None = None,
         type: str = "flexible-asset-types",
     ) -> str:
         """Create a flexible asset type (custom asset schema), optionally with its fields.
@@ -136,7 +136,7 @@ def register(mcp: FastMCP, client_factory: Callable[[], CloudRadialClient | None
         description: str | None = None,
         icon: str | None = None,
         show_in_menu: bool | None = None,
-        fields: list | None = None,
+        fields: list[dict] | None = None,
         type: str = "flexible-asset-types",
     ) -> str:
         """Update a flexible asset type.

@@ -45,7 +45,7 @@ def register(mcp: FastMCP, client_factory: Callable[[], CloudRadialClient | None
             return f"Error: {e}"
 
     @mcp.tool()
-    async def cloudradial_create_archive(archive: dict) -> str:
+    async def cloudradial_create_archive(archive: dict[str, object]) -> str:
         """Create (or, with id set, update) a report archive definition.
 
         API: POST /api/beta/archive
@@ -130,7 +130,7 @@ def register(mcp: FastMCP, client_factory: Callable[[], CloudRadialClient | None
             return f"Error: {e}"
 
     @mcp.tool()
-    async def cloudradial_create_archive_item(archive_id: int, item: dict) -> str:
+    async def cloudradial_create_archive_item(archive_id: int, item: dict[str, object]) -> str:
         """Add an item (report) to an archive.
 
         API: POST /api/beta/archive/{archiveId}/item
