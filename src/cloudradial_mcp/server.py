@@ -90,15 +90,12 @@ def create_mcp_server(settings: Settings) -> FastMCP:
 
     client_factory: Callable[[], CloudRadialClient | None] = lambda: get_client_from_context(settings)
 
-    from .tools import archive, article, company, feedback, flexible_asset_types, flexible_assets, odata, token
+    from .tools import archive, article, company, feedback, token
 
     company.register(mcp, client_factory)
     article.register(mcp, client_factory)
     feedback.register(mcp, client_factory)
     token.register(mcp, client_factory)
     archive.register(mcp, client_factory)
-    flexible_assets.register(mcp, client_factory)
-    flexible_asset_types.register(mcp, client_factory)
-    odata.register(mcp, client_factory)
 
     return mcp

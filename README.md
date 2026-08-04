@@ -6,7 +6,7 @@
 
 ## Overview
 
-This server implements the [Model Context Protocol](https://modelcontextprotocol.io/) (Streamable HTTP/SSE transport) and wraps every operation in CloudRadial's official OpenAPI 3.0 spec (v1, 34 operations across 8 resource groups: Company, Article, Feedback, Token, Archive/ArchiveItem, FlexibleAsset, FlexibleAssetType, and the OData v2 metadata endpoint). It follows the MSPbots **Vendor MCP Service SOP**: stateless, no stored credentials, per-request header authentication.
+This server implements the [Model Context Protocol](https://modelcontextprotocol.io/) (Streamable HTTP/SSE transport) and wraps **16 tools** across 5 resource groups (Company, Article, Feedback, Token, Archive/ArchiveItem), trimmed down on 2026-08-04 from an original 34-operation full-API build (which additionally covered FlexibleAsset, FlexibleAssetType, and the OData v2 metadata endpoint). MSPbots' own stored integration config for this vendor calls exactly those 5 kept resource groups (confirmed via `web/int/sys/integration/api/list` against integration id `1579382881663623169`: Company, Article, Feedback, Token, Archive, Archive Item) — all 16 tools in those groups were already tight core CRUD (`get`/`create`/`delete`, no bloat), so no per-tool trimming was needed within them; `FlexibleAsset`, `FlexibleAssetType`, and OData (18 tools total) were removed entirely as unused by MSPbots. If a removed group is needed later, the vendor's OpenAPI spec (linked below) still documents its exact operations and they can be re-added the same way the kept tools were generated. It follows the MSPbots **Vendor MCP Service SOP**: stateless, no stored credentials, per-request header authentication.
 
 The underlying API authenticates via **HTTP Basic Auth**: the Public Key is the username and the Private Key is the password (both generated under *Partner > Settings > Integrations > API* in the CloudRadial portal). This matches how the existing CloudRadial integration on app.mspbots.ai is configured (`authType: 0`, custom Key/Secret credential fields) — this server receives both values per request via headers and never persists them.
 
@@ -67,7 +67,7 @@ Connect your MCP client with:
 
 ## Tool List
 
-**34 tools** — full coverage of every operation in the official CloudRadial OpenAPI spec.
+**16 tools**, trimmed down from an original 34-operation full-API build (2026-08-04) — see Overview above for the exact rationale.
 
 ### Company (1)
 
@@ -110,38 +110,6 @@ Connect your MCP client with:
 | `cloudradial_create_archive_item` | 向归档添加条目(写操作,body 结构未公开,见 Known Gaps) | `archive_id`, `item`(dict) |
 | `cloudradial_delete_archive_item` | 删除归档中的单个条目(写操作) | `archive_id`, `item_id` |
 
-### FlexibleAsset — IT Glue 兼容层 (8)
-
-| Tool | 功能 | 参数 |
-|---|---|---|
-| `cloudradial_get_flexible_assets` | 按资产类型列出自定义资产记录 | `flexible_asset_type_id`, `organization_id?`, `name?`, `page_number?`, `page_size?`, `include?`, `sort?` |
-| `cloudradial_create_flexible_asset` | 新建自定义资产记录(写操作) | `flexible_asset_type_id`, `traits`, `organization_id?`, `archived?`, `type="flexible-assets"` |
-| `cloudradial_update_flexible_assets` | 批量更新自定义资产记录(写操作) | `assets`(list,JSON:API 形状,见 docstring) |
-| `cloudradial_delete_flexible_assets` | 批量删除自定义资产记录(写操作) | `ids`(list), `type="flexible-assets"` |
-| `cloudradial_get_flexible_asset` | 按 ID 查自定义资产记录 | `id`, `include?` |
-| `cloudradial_delete_flexible_asset` | 删除单个自定义资产记录(写操作) | `id` |
-| `cloudradial_update_flexible_asset` | 更新单个自定义资产记录(写操作) | `id`, `flexible_asset_type_id?`, `archived?`, `traits?`, `organization_id?`, `type="flexible-assets"` |
-| `cloudradial_create_organization_flexible_assets` | 在指定公司下批量新建自定义资产(写操作) | `org_id`, `assets`(list) |
-
-### FlexibleAssetType — 自定义资产类型定义 (8)
-
-| Tool | 功能 | 参数 |
-|---|---|---|
-| `cloudradial_get_flexible_asset_types` | 列出自定义资产类型 | `id?`, `name?`, `icon?`, `enabled?`, `page_number?`, `page_size?`, `include?`, `sort?` |
-| `cloudradial_create_flexible_asset_type` | 新建自定义资产类型(可同时创建字段,写操作) | `name`, `description?`, `icon?`, `show_in_menu?`, `fields?`(list) |
-| `cloudradial_get_flexible_asset_type` | 按 ID 查自定义资产类型 | `id`, `include?` |
-| `cloudradial_update_flexible_asset_type` | 更新自定义资产类型(写操作) | `id`, `name`, `description?`, `icon?`, `show_in_menu?`, `fields?`(list) |
-| `cloudradial_delete_flexible_asset_type` | 删除自定义资产类型(写操作) | `id` |
-| `cloudradial_get_flexible_asset_fields` | 列出资产类型下的字段定义 | `type_id`, `id?`, `page_number?`, `page_size?`, `include?`, `sort?` |
-| `cloudradial_create_flexible_asset_field` | 为资产类型新增字段定义(写操作) | `type_id`, `name`, `order`, `kind`, 其余可选字段 |
-| `cloudradial_get_flexible_asset_field` | 按 ID 查单个字段定义 | `type_id`, `field_id` |
-
-### Metadata — OData v2 (2)
-
-| Tool | 功能 | 参数 |
-|---|---|---|
-| `cloudradial_get_odata_metadata` | 获取 OData $metadata 文档 | 无 |
-| `cloudradial_query_odata` | 查询 OData v2 端点 | `raw_query?`(原始 OData 查询字符串,如 `$filter=...&$top=10`) |
 
 ## 测试示例 (Test Example)
 
@@ -177,8 +145,15 @@ curl -X POST http://localhost:8080/mcp \
 
 ## Known Gaps / Not Yet Verified
 
-- Not yet tested against a live CloudRadial account — only protocol-level verification (health check, 401 on missing credentials, `tools/list` returning all 34 tools) has been done so far.
+- **Trimmed from 34 to 16 tools on 2026-08-04.** The original build covered
+  every operation in the official OpenAPI spec. A later scope decision cut
+  this back to MSPbots' actually-used 5 resource groups (Company, Article,
+  Feedback, Token, Archive/ArchiveItem) — see Overview above for the exact
+  rationale. `FlexibleAsset`, `FlexibleAssetType`, and the OData v2
+  metadata endpoint (18 tools total) were removed entirely as unused. If a
+  removed group is needed later, the vendor's OpenAPI spec (linked below)
+  still documents its exact operations and they can be re-added the same
+  way the kept tools were generated.
+- Not yet tested against a live CloudRadial account — only protocol-level verification (health check, 401 on missing credentials, `tools/list` returning all 16 tools) has been done so far.
 - `cloudradial_create_archive_item`'s request body shape is not published in CloudRadial's OpenAPI spec (the schema is empty) — CloudRadial's docs describe archive item uploads via drag-and-drop, an archive-unique email address, or "an API connection" (up to 128MB), but do not document the exact JSON field names. Verify the correct payload shape with CloudRadial support or by inspecting a successful portal-side upload before relying on this tool in production.
 - The `Token` API (`cloudradial_get_tokens`/`cloudradial_set_token`/`cloudradial_delete_token`) manages CloudRadial's portal merge-field variables (`@`-prefixed tokens used in Articles/Automations/Messages) — it is unrelated to authentication, despite the name.
-- The `FlexibleAsset`/`FlexibleAssetType` tools wrap a JSON:API-shaped, IT Glue-compatible layer (`/compatibility/...`); bulk update/create-under-organization tools accept pre-shaped JSON:API list payloads rather than fully flattened arguments, since the nesting (`data[].attributes.{...}`) doesn't flatten cleanly into named parameters.
-- `cloudradial_query_odata` accepts a raw OData query string rather than typed parameters, since the spec does not declare `$filter`/`$select`/etc. as typed Swagger parameters (standard for OData v4 endpoints).
