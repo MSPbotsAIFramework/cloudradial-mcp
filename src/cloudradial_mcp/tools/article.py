@@ -1,90 +1,64 @@
-import json
 from collections.abc import Callable
+from typing import Annotated
 
 from mcp.server.fastmcp import FastMCP
+from mcp.types import ToolAnnotations
+from pydantic import Field
 
+from .._json import dump_json_capped, error_envelope
 from ..api_client import CloudRadialClient, CloudRadialError
 from ._common import NO_CREDS, paging_params
+
+_MAX_TAKE = 200
 
 
 def register(mcp: FastMCP, client_factory: Callable[[], CloudRadialClient | None]) -> None:
 
-    @mcp.tool()
+    @mcp.tool(annotations=ToolAnnotations(readOnlyHint=True))
     async def cloudradial_get_articles(
-        skip: int | None = None,
-        take: int | None = None,
-        order: str | None = None,
-        direction: str | None = None,
-        filter_field: str | None = None,
-        condition: str | None = None,
-        value: str | None = None,
+        skip: Annotated[int | None, Field(description="Records to skip (pagination offset). Default 0.")] = None,
+        take: Annotated[int | None, Field(description="Records to return (default 10, max 200).")] = None,
+        order: Annotated[str | None, Field(description="Field name to sort by.")] = None,
+        direction: Annotated[str | None, Field(description='Sort direction: "a" (ascending) or "d" (descending).')] = None,
+        filter_field: Annotated[str | None, Field(description="Field name to filter on.")] = None,
+        condition: Annotated[str | None, Field(description='Filter condition: "eq" or "contains".')] = None,
+        value: Annotated[str | None, Field(description="Value to test the filter against.")] = None,
     ) -> str:
-        """List knowledge base articles.
-
-        API: GET /api/beta/article
-
-        Args:
-            skip: Number of records to skip (pagination offset). Default 0.
-            take: Number of records to return. Default 10.
-            order: Field name to sort by.
-            direction: Sort direction: "a" (ascending) or "d" (descending).
-            filter_field: Field name to filter on.
-            condition: Filter condition: "eq" (equals) or "contains".
-            value: Value to test the filter against.
-        """
+        """List knowledge base articles."""
         client = client_factory()
         if client is None:
             return NO_CREDS
+        if take is not None:
+            take = min(take, _MAX_TAKE)
         try:
             result = await client.get(
                 "/api/beta/article",
                 params=paging_params(skip, take, order, direction, filter_field, condition, value),
             )
-            return json.dumps(result, indent=2)
+            return dump_json_capped(result)
         except CloudRadialError as e:
-            return f"Error: {e}"
+            return e.to_envelope()
 
     @mcp.tool()
     async def cloudradial_create_article(
-        subject: str,
-        body: str,
-        category: str,
-        company_id: int,
-        groups: str,
-        article_source: int | None = None,
-        author: str | None = None,
-        date: str | None = None,
-        external_article_id: str | None = None,
-        is_front_page: bool | None = None,
-        is_new_window: bool | None = None,
-        is_pinned: bool | None = None,
-        permalink_key: str | None = None,
-        tags: str | None = None,
-        url: str | None = None,
-        id: int | None = None,
+        subject: Annotated[str, Field(description="Required article title.")],
+        body: Annotated[str, Field(description="Required article HTML/text body.")],
+        category: Annotated[str, Field(description="Required category name.")],
+        company_id: Annotated[int, Field(description="Required company ID this article belongs to.")],
+        groups: Annotated[str, Field(description="Required comma-separated list of user/company groups with access.")],
+        article_source: Annotated[int | None, Field(description="Optional source enum (0-3).")] = None,
+        author: Annotated[str | None, Field(description="Optional author name.")] = None,
+        date: Annotated[str | None, Field(description="Optional publish date (ISO 8601).")] = None,
+        external_article_id: Annotated[str | None, Field(description="Optional external system ID for this article.")] = None,
+        is_front_page: Annotated[bool | None, Field(description="Show on the portal front page.")] = None,
+        is_new_window: Annotated[bool | None, Field(description="Open links in a new window.")] = None,
+        is_pinned: Annotated[bool | None, Field(description="Pin to the top of listings.")] = None,
+        permalink_key: Annotated[str | None, Field(description="Optional permalink slug.")] = None,
+        tags: Annotated[str | None, Field(description="Optional comma-separated tags.")] = None,
+        url: Annotated[str | None, Field(description="Optional external URL instead of a body.")] = None,
+        id: Annotated[int | None, Field(description="Set to update an existing article instead of creating one.")] = None,
     ) -> str:
-        """Create (or, with id set, upsert) a knowledge base article.
-
-        API: POST /api/beta/article
-
-        Args:
-            subject: Required article title.
-            body: Required article HTML/text body.
-            category: Required category name.
-            company_id: Required company ID this article belongs to.
-            groups: Required comma-separated list of user/company groups with access.
-            article_source: Optional source enum (0-3).
-            author: Optional author name.
-            date: Optional publish date (ISO 8601).
-            external_article_id: Optional external system ID for this article.
-            is_front_page: Optional — show on the portal front page.
-            is_new_window: Optional — open links in a new window.
-            is_pinned: Optional — pin to the top of listings.
-            permalink_key: Optional permalink slug.
-            tags: Optional comma-separated tags.
-            url: Optional external URL instead of a body.
-            id: Optional — set to update an existing article instead of creating one.
-        """
+        """Create (or, with id set, update) a knowledge base article."""
         client = client_factory()
         if client is None:
             return NO_CREDS
@@ -108,25 +82,29 @@ def register(mcp: FastMCP, client_factory: Callable[[], CloudRadialClient | None
         }
         try:
             result = await client.post("/api/beta/article", json_body={k: v for k, v in payload.items() if v is not None})
-            return json.dumps(result, indent=2)
+            return dump_json_capped(result)
         except CloudRadialError as e:
-            return f"Error: {e}"
+            return e.to_envelope()
 
-    @mcp.tool()
-    async def cloudradial_delete_article(company_id: int, id: int) -> str:
+    @mcp.tool(annotations=ToolAnnotations(destructiveHint=True))
+    async def cloudradial_delete_article(
+        company_id: Annotated[int, Field(description="Required company ID the article belongs to.")],
+        id: Annotated[int, Field(description="Required article ID to delete.")],
+        confirm: Annotated[bool, Field(description="Required — must be set to true to proceed.")] = False,
+    ) -> str:
         """Delete a knowledge base article.
 
-        API: DELETE /api/beta/article
-
-        Args:
-            company_id: Required company ID the article belongs to.
-            id: Required article ID to delete.
+        Destructive and irreversible. Requires confirm=true.
         """
+        if not confirm:
+            return error_envelope(
+                "invalid_argument", "destructive operation requires confirm=true", False
+            )
         client = client_factory()
         if client is None:
             return NO_CREDS
         try:
             result = await client.delete("/api/beta/article", json_body={"companyId": company_id, "id": id})
-            return json.dumps(result, indent=2)
+            return dump_json_capped(result)
         except CloudRadialError as e:
-            return f"Error: {e}"
+            return e.to_envelope()

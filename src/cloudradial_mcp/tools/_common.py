@@ -1,6 +1,10 @@
-NO_CREDS = (
-    "Error: No CloudRadial credentials. Send the X-CloudRadial-Public-Key and "
-    "X-CloudRadial-Private-Key headers."
+from .._json import error_envelope
+
+NO_CREDS = error_envelope(
+    "not_configured",
+    "No CloudRadial credentials. Send the X-CloudRadial-Public-Key and "
+    "X-CloudRadial-Private-Key headers.",
+    False,
 )
 
 

@@ -1,45 +1,44 @@
-import json
 from collections.abc import Callable
+from typing import Annotated
 
 from mcp.server.fastmcp import FastMCP
+from mcp.types import ToolAnnotations
+from pydantic import Field
 
+from .._json import dump_json_capped
 from ..api_client import CloudRadialClient, CloudRadialError
 from ._common import NO_CREDS, paging_params
+
+_MAX_TAKE = 200
 
 
 def register(mcp: FastMCP, client_factory: Callable[[], CloudRadialClient | None]) -> None:
 
-    @mcp.tool()
+    @mcp.tool(annotations=ToolAnnotations(readOnlyHint=True))
     async def cloudradial_get_companies(
-        skip: int | None = None,
-        take: int | None = None,
-        order: str | None = None,
-        direction: str | None = None,
-        filter_field: str | None = None,
-        condition: str | None = None,
-        value: str | None = None,
+        skip: Annotated[int | None, Field(description="Records to skip (pagination offset). Default 0.")] = None,
+        take: Annotated[int | None, Field(description="Records to return (default 10, max 200).")] = None,
+        order: Annotated[str | None, Field(description="Field name to sort by.")] = None,
+        direction: Annotated[str | None, Field(description='Sort direction: "a" (ascending) or "d" (descending).')] = None,
+        filter_field: Annotated[str | None, Field(description='Field name to filter on (e.g. "name").')] = None,
+        condition: Annotated[str | None, Field(description='Filter condition: "eq" or "contains".')] = None,
+        value: Annotated[str | None, Field(description="Value to test the filter against.")] = None,
     ) -> str:
         """List companies (client organizations) in the CloudRadial portal.
 
-        API: GET /api/beta/company
-
-        Args:
-            skip: Number of records to skip (pagination offset). Default 0.
-            take: Number of records to return. Default 10.
-            order: Field name to sort by.
-            direction: Sort direction: "a" (ascending) or "d" (descending).
-            filter_field: Field name to filter on (e.g. "name").
-            condition: Filter condition: "eq" (equals) or "contains".
-            value: Value to test the filter against.
+        Use this to find a company_id before scoping articles, feedback,
+        or tokens to a specific client.
         """
         client = client_factory()
         if client is None:
             return NO_CREDS
+        if take is not None:
+            take = min(take, _MAX_TAKE)
         try:
             result = await client.get(
                 "/api/beta/company",
                 params=paging_params(skip, take, order, direction, filter_field, condition, value),
             )
-            return json.dumps(result, indent=2)
+            return dump_json_capped(result)
         except CloudRadialError as e:
-            return f"Error: {e}"
+            return e.to_envelope()

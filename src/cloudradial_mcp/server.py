@@ -85,6 +85,30 @@ def create_mcp_server(settings: Settings) -> FastMCP:
     # correctly behind a reverse proxy or docker network.
     mcp = FastMCP(
         name="cloudradial-mcp",
+        instructions=(
+            "CloudRadial is a client portal / service catalog platform MSPs give "
+            "their end customers — knowledge base articles, CSAT/feedback "
+            "collection, report archives, and portal merge-field tokens, "
+            "organized per company (client organization). Use this server for: "
+            "looking up client organizations (cloudradial_get_companies); "
+            "reading or publishing knowledge base content "
+            "(cloudradial_get_articles / cloudradial_create_article / "
+            "cloudradial_delete_article); reviewing customer satisfaction "
+            "records (cloudradial_get_feedback / cloudradial_create_feedback / "
+            "cloudradial_delete_feedback); managing report archives that "
+            "customers or automations upload recurring reports into "
+            "(cloudradial_get_archives / cloudradial_create_archive / "
+            "cloudradial_delete_archive and the matching "
+            "cloudradial_get_archive_items / cloudradial_create_archive_item / "
+            "cloudradial_delete_archive_item for items inside an archive); and "
+            "managing @-prefixed portal merge-field tokens used inside "
+            "articles/automations/messages (cloudradial_get_tokens / "
+            "cloudradial_set_token / cloudradial_delete_token — unrelated to "
+            "authentication despite the name). Typical flow: "
+            "cloudradial_get_companies to find a company_id, then scope "
+            "articles/feedback/tokens to it. All delete tools are destructive "
+            "and require confirm=true."
+        ),
         transport_security=TransportSecuritySettings(enable_dns_rebinding_protection=False),
     )
 

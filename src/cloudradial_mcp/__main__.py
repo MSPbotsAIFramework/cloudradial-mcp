@@ -11,7 +11,7 @@ def _build_http_app(mcp, settings):
     from starlette.routing import Mount, Route
 
     async def health(_: Request) -> JSONResponse:
-        return JSONResponse({"status": "ok", "service": "cloudradial-mcp", "transport": "http"})
+        return JSONResponse({"status": "ok"})
 
     mcp_app = mcp.streamable_http_app()  # Starlette app owning the session-manager lifespan
     mounted = GatewayCredsMiddleware(mcp_app, settings)
