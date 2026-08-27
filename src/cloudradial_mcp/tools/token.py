@@ -20,7 +20,11 @@ def register(mcp: FastMCP, client_factory: Callable[[], CloudRadialClient | None
     async def cloudradial_get_tokens(
         company_id: Annotated[int | None, Field(description="Scope to a specific company's tokens.")] = None,
     ) -> str:
-        """List portal merge-field tokens (@-prefixed variables used in Articles/Automations)."""
+        """List portal merge-field tokens (@-prefixed variables used in
+        Articles/Automations/Messages) — unrelated to API authentication
+        despite the name; this server has no auth-token management
+        capability at all.
+        """
         client = client_factory()
         if client is None:
             return NO_CREDS
@@ -39,7 +43,9 @@ def register(mcp: FastMCP, client_factory: Callable[[], CloudRadialClient | None
         value: Annotated[str | None, Field(description="Value to assign to the token.")] = None,
         type: Annotated[str | None, Field(description="Optional token type.")] = None,
     ) -> str:
-        """Create or update a portal merge-field token value."""
+        """Create or update a portal merge-field token value — unrelated to
+        API authentication despite the name.
+        """
         client = client_factory()
         if client is None:
             return NO_CREDS
@@ -58,7 +64,9 @@ def register(mcp: FastMCP, client_factory: Callable[[], CloudRadialClient | None
         type: Annotated[str | None, Field(description="Optional token type.")] = None,
         confirm: Annotated[bool, Field(description="Required — must be set to true to proceed.")] = False,
     ) -> str:
-        """Delete a portal merge-field token.
+        """Delete a portal merge-field token — unrelated to API
+        authentication despite the name; this is not how to revoke or
+        remove an API key/credential.
 
         Destructive and irreversible. Requires confirm=true.
         """

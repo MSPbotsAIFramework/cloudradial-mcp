@@ -24,7 +24,12 @@ def register(mcp: FastMCP, client_factory: Callable[[], CloudRadialClient | None
         condition: Annotated[str | None, Field(description='Filter condition: "eq" or "contains".')] = None,
         value: Annotated[str | None, Field(description="Value to test the filter against.")] = None,
     ) -> str:
-        """List CSAT/feedback records collected from ticket closures or the portal."""
+        """List CSAT/feedback records collected from ticket closures or the portal.
+
+        condition only supports "eq"/"contains" — there's no numeric
+        range/comparison operator (e.g. "rating below 3"). For that,
+        fetch the records and filter client-side.
+        """
         client = client_factory()
         if client is None:
             return NO_CREDS

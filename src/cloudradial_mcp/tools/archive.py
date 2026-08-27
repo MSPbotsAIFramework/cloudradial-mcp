@@ -24,7 +24,11 @@ def register(mcp: FastMCP, client_factory: Callable[[], CloudRadialClient | None
         condition: Annotated[str | None, Field(description='Filter condition: "eq" or "contains".')] = None,
         value: Annotated[str | None, Field(description="Value to test the filter against.")] = None,
     ) -> str:
-        """List report archives (containers for uploaded/synced reports)."""
+        """List report archives (containers for uploaded/synced reports).
+
+        No dedicated company filter — to scope to one company, pass
+        filter_field="companyId", condition="eq", value=<company_id>.
+        """
         client = client_factory()
         if client is None:
             return NO_CREDS
@@ -58,7 +62,10 @@ def register(mcp: FastMCP, client_factory: Callable[[], CloudRadialClient | None
                     "partnerEmailList, slackWebhook/slackPartnerWebhook, "
                     "teamsWebhook/teamsPartnerWebhook, flowPartnerWebhook, "
                     "jsonPartnerWebhook, companyGroups, userGroups, id (set "
-                    "to update)."
+                    "to update — resolve it via cloudradial_get_archives "
+                    "first, never guess one; omitting it creates a new "
+                    "archive instead of updating, so don't forget to "
+                    "include it when the intent is an update)."
                 )
             ),
         ],

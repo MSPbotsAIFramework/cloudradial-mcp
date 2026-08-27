@@ -24,7 +24,11 @@ def register(mcp: FastMCP, client_factory: Callable[[], CloudRadialClient | None
         condition: Annotated[str | None, Field(description='Filter condition: "eq" or "contains".')] = None,
         value: Annotated[str | None, Field(description="Value to test the filter against.")] = None,
     ) -> str:
-        """List knowledge base articles."""
+        """List knowledge base articles.
+
+        No dedicated company filter — to scope to one company, pass
+        filter_field="companyId", condition="eq", value=<company_id>.
+        """
         client = client_factory()
         if client is None:
             return NO_CREDS
@@ -56,7 +60,17 @@ def register(mcp: FastMCP, client_factory: Callable[[], CloudRadialClient | None
         permalink_key: Annotated[str | None, Field(description="Optional permalink slug.")] = None,
         tags: Annotated[str | None, Field(description="Optional comma-separated tags.")] = None,
         url: Annotated[str | None, Field(description="Optional external URL instead of a body.")] = None,
-        id: Annotated[int | None, Field(description="Set to update an existing article instead of creating one.")] = None,
+        id: Annotated[
+            int | None,
+            Field(
+                description=(
+                    "Set to update an existing article instead of creating "
+                    "one. Resolve this via cloudradial_get_articles first — "
+                    "never guess an id — since setting it overwrites that "
+                    "article's fields with no separate confirmation step."
+                )
+            ),
+        ] = None,
     ) -> str:
         """Create (or, with id set, update) a knowledge base article."""
         client = client_factory()
