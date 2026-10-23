@@ -108,14 +108,14 @@ curl http://localhost:8080/health
 
 No credentials are required for the health endpoint.
 
-## 授权参数说明 (Authentication)
+## Authentication parameters (Authentication)
 
 Every request to `/mcp` must include the following HTTP headers:
 
-| Header | 类型 | 是否必填 | 默认值 | 枚举值 | 字段描述 | Example |
+| Header | Type | Required | Default | Allowed values | Description | Example |
 |---|---|---|---|---|---|---|
-| `X-CloudRadial-Public-Key` | string | 必填 | 无 | 无(自由文本) | HTTP Basic Auth 的用户名部分,对应 CloudRadial 门户 Partner > Settings > Integrations > API 页面生成的 Public Key。 | `X-CloudRadial-Public-Key: 11111111-1111-1111-1111-111111111111` |
-| `X-CloudRadial-Private-Key` | string | 必填 | 无 | 无(自由文本) | HTTP Basic Auth 的密码部分,对应同一页面生成的 Private Key;该值只在创建时显示一次,需妥善保存。 | `X-CloudRadial-Private-Key: 22222222-2222-2222-2222-222222222222` |
+| `X-CloudRadial-Public-Key` | string | Yes | None | None (free text) | Username part of HTTP Basic Auth; corresponds to the Public Key generated on the CloudRadial portal's Partner > Settings > Integrations > API page. | `X-CloudRadial-Public-Key: 11111111-1111-1111-1111-111111111111` |
+| `X-CloudRadial-Private-Key` | string | Yes | None | None (free text) | Password part of HTTP Basic Auth; corresponds to the Private Key generated on the same page. This value is shown only once at creation, so keep it safe. | `X-CloudRadial-Private-Key: 22222222-2222-2222-2222-222222222222` |
 
 Missing either header returns `401 Unauthorized`.
 
@@ -143,47 +143,47 @@ Connect your MCP client with:
 
 ### Company (1)
 
-| Tool | 功能 | 参数 |
+| Tool | Function | Parameters |
 |---|---|---|
-| `cloudradial_get_companies` | 列出门户中的公司(客户组织) | `skip?`, `take?`, `order?`, `direction?`, `filter_field?`, `condition?`, `value?` |
+| `cloudradial_get_companies` | List companies (customer organizations) in the portal | `skip?`, `take?`, `order?`, `direction?`, `filter_field?`, `condition?`, `value?` |
 
 ### Article (3)
 
-| Tool | 功能 | 参数 |
+| Tool | Function | Parameters |
 |---|---|---|
-| `cloudradial_get_articles` | 列出知识库文章 | `skip?`, `take?`, `order?`, `direction?`, `filter_field?`, `condition?`, `value?` |
-| `cloudradial_create_article` | 新建/更新知识库文章(写操作) | `subject`, `body`, `category`, `company_id`, `groups`, 其余可选字段, `id?`(传入则为更新) |
-| `cloudradial_delete_article` | 删除知识库文章(写操作) | `company_id`, `id` |
+| `cloudradial_get_articles` | List knowledge base articles | `skip?`, `take?`, `order?`, `direction?`, `filter_field?`, `condition?`, `value?` |
+| `cloudradial_create_article` | Create/update a knowledge base article (write operation) | `subject`, `body`, `category`, `company_id`, `groups`, other optional fields, `id?` (if provided, it is an update) |
+| `cloudradial_delete_article` | Delete a knowledge base article (write operation) | `company_id`, `id` |
 
 ### Feedback (3)
 
-| Tool | 功能 | 参数 |
+| Tool | Function | Parameters |
 |---|---|---|
-| `cloudradial_get_feedback` | 列出 CSAT/反馈记录 | `skip?`, `take?`, `order?`, `direction?`, `filter_field?`, `condition?`, `value?` |
-| `cloudradial_create_feedback` | 提交反馈/CSAT 记录(写操作) | `feedback`(dict,字段见工具 docstring) |
-| `cloudradial_delete_feedback` | 删除反馈记录(写操作) | `id` |
+| `cloudradial_get_feedback` | List CSAT/feedback records | `skip?`, `take?`, `order?`, `direction?`, `filter_field?`, `condition?`, `value?` |
+| `cloudradial_create_feedback` | Submit a feedback/CSAT record (write operation) | `feedback` (dict; see the tool docstring for fields) |
+| `cloudradial_delete_feedback` | Delete a feedback record (write operation) | `id` |
 
-### Token (3) — portal 合并字段变量,与鉴权无关
+### Token (3) — portal merge-field variables, unrelated to authentication
 
-| Tool | 功能 | 参数 |
+| Tool | Function | Parameters |
 |---|---|---|
-| `cloudradial_get_tokens` | 列出门户合并字段 token(@变量) | `company_id?` |
-| `cloudradial_set_token` | 新建/更新合并字段 token(写操作) | `company_id?`, `token?`, `value?`, `type?` |
-| `cloudradial_delete_token` | 删除合并字段 token(写操作) | `company_id?`, `token?`, `value?`, `type?` |
+| `cloudradial_get_tokens` | List portal merge-field tokens (@variables) | `company_id?` |
+| `cloudradial_set_token` | Create/update a merge-field token (write operation) | `company_id?`, `token?`, `value?`, `type?` |
+| `cloudradial_delete_token` | Delete a merge-field token (write operation) | `company_id?`, `token?`, `value?`, `type?` |
 
 ### Archive & Archive Item (6)
 
-| Tool | 功能 | 参数 |
+| Tool | Function | Parameters |
 |---|---|---|
-| `cloudradial_get_archives` | 列出报表归档定义 | `skip?`, `take?`, `order?`, `direction?`, `filter_field?`, `condition?`, `value?` |
-| `cloudradial_create_archive` | 新建/更新归档定义(写操作) | `archive`(dict,字段见工具 docstring) |
-| `cloudradial_delete_archive` | 删除归档定义(写操作) | `archive_id` |
-| `cloudradial_get_archive_items` | 列出归档内的条目(报表) | `archive_id`, `skip?`, `take?`, `order?`, `direction?`, `filter_field?`, `condition?`, `value?` |
-| `cloudradial_create_archive_item` | 向归档添加条目(写操作,body 结构未公开,见 Known Gaps) | `archive_id`, `item`(dict) |
-| `cloudradial_delete_archive_item` | 删除归档中的单个条目(写操作) | `archive_id`, `item_id` |
+| `cloudradial_get_archives` | List report archive definitions | `skip?`, `take?`, `order?`, `direction?`, `filter_field?`, `condition?`, `value?` |
+| `cloudradial_create_archive` | Create/update an archive definition (write operation) | `archive` (dict; see the tool docstring for fields) |
+| `cloudradial_delete_archive` | Delete an archive definition (write operation) | `archive_id` |
+| `cloudradial_get_archive_items` | List items (reports) in an archive | `archive_id`, `skip?`, `take?`, `order?`, `direction?`, `filter_field?`, `condition?`, `value?` |
+| `cloudradial_create_archive_item` | Add an item to an archive (write operation; body structure not public, see Known Gaps) | `archive_id`, `item`(dict) |
+| `cloudradial_delete_archive_item` | Delete a single item from an archive (write operation) | `archive_id`, `item_id` |
 
 
-## 测试示例 (Test Example)
+## Test Example
 
 List companies:
 
