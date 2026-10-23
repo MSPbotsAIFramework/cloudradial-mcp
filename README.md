@@ -4,6 +4,78 @@
 
 > **Naming note:** app.mspbots.ai calls this integration **"CloudRadial"** (`sys_integration.subject_code = CLOUDRADIAL`). The vendor's public API is documented at [developers.cloudradial.com](https://developers.cloudradial.com/docs/getting-started) and its Swagger UI at `https://api.us.cloudradial.com/swagger`.
 
+<div align="center">
+
+## MSPbots Connector
+
+**The MCP Gateway built for MSPs: visible, controlled, and your data stays where it belongs.**
+
+[**Get started at connect.mspbots.ai →**](https://connect.mspbots.ai)
+
+</div>
+
+---
+
+MSPbots Connector gives your AI clients one MCP URL to reach your entire MSP stack (RMM, PSA, documentation, security, finance), and gives you control over who can call which tool and a record of everything that was called.
+
+**Hosted service: [connect.mspbots.ai](https://connect.mspbots.ai)** · Free to use.
+
+### Why Connector
+
+![MSPbots Connector](https://stgoss.mspbots.ai/files/mcp/mspbots-mcp.png)
+
+| | |
+|---|---|
+| **Visible** | Every tool call is logged: who, which vendor, when. Usage dashboard, CSV export, SIEM streaming. |
+| **Controlled** | Role-based, per-tool allowlist. Deny by default. |
+| **Protected** | Credentials encrypted per record. AI clients never see your vendor passwords or tokens. |
+| **MSP-native** | Built for the MSP stack only: RMM, PSA, documentation, security, finance. |
+
+### Quick start
+
+1. **Sign up** at [connect.mspbots.ai](https://connect.mspbots.ai).
+2. **Connect your vendors.** Pick from 150+ connectors and authorize each one on the vendor's own page, or bring your own API keys. No extra vendor accounts needed.
+3. **Set access.** Create roles and decide which tools each role may call. Nothing is allowed until you allow it.
+4. **Add your MCP URL to your AI client.** Copy the URL from your Connector dashboard into Claude, ChatGPT, Cursor, VS Code, Gemini, Codex, or any MCP-capable client.
+5. **Ask your AI to do real work**, and watch every call appear in the audit log.
+
+### Features
+
+**Unified gateway**
+- One MCP URL for all your AI clients
+- 150+ connectors across the MSP stack
+- Custom MCP servers supported, free
+- Authorization happens on each vendor's own page; the AI never sees passwords or tokens
+- Bring your own credentials: use the vendor API keys you already have
+- Multiple accounts per app; connect once, reuse across AI clients
+- Tool search: finds the right action for the task
+- One sign-in; vendor credentials are injected behind the scenes and OAuth tokens refresh automatically
+
+**Visibility**
+- Audit log for every tool call (who, which vendor, when)
+- Usage dashboard: call volume, top vendors, error rate, per-user activity
+- Export audit logs to CSV, or stream to Loki, Graylog, or LogScale (SIEM)
+- Optional recording of tool arguments and result summaries (off by default, enabled per organization)
+
+**Control**
+- Per-role, per-tool allowlist, deny by default
+- owner / admin / member roles
+- SCIM provisioning with Entra ID, Okta, JumpCloud, and Google Workspace
+
+**Security**
+- Credentials encrypted one record at a time (AES-256-GCM, per-record key)
+- AI clients authenticate with OAuth 2.1 + PKCE
+- Vendor responses are scanned for prompt-injection patterns and returned as structured data. This is one layer of defense, not a guarantee against every attack.
+- Static egress IP for customer firewall and API allowlisting
+
+### Pricing
+
+**Free.**
+
+Links: [connect.mspbots.ai](https://connect.mspbots.ai) · [mspbots.ai](https://mspbots.ai)
+
+---
+
 ## Overview
 
 This server implements the [Model Context Protocol](https://modelcontextprotocol.io/) (Streamable HTTP/SSE transport) and wraps **16 tools** across 5 resource groups (Company, Article, Feedback, Token, Archive/ArchiveItem), trimmed down on 2026-08-04 from an original 34-operation full-API build (which additionally covered FlexibleAsset, FlexibleAssetType, and the OData v2 metadata endpoint). MSPbots' own stored integration config for this vendor calls exactly those 5 kept resource groups (confirmed via `web/int/sys/integration/api/list` against integration id `1579382881663623169`: Company, Article, Feedback, Token, Archive, Archive Item) — all 16 tools in those groups were already tight core CRUD (`get`/`create`/`delete`, no bloat), so no per-tool trimming was needed within them; `FlexibleAsset`, `FlexibleAssetType`, and OData (18 tools total) were removed entirely as unused by MSPbots. If a removed group is needed later, the vendor's OpenAPI spec (linked below) still documents its exact operations and they can be re-added the same way the kept tools were generated. It follows the MSPbots **Vendor MCP Service SOP**: stateless, no stored credentials, per-request header authentication.
