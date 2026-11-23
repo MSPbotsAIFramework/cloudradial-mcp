@@ -18,7 +18,7 @@
 
 MSPbots Connector gives your AI clients one MCP URL to reach your entire MSP stack (RMM, PSA, documentation, security, finance), and gives you control over who can call which tool and a record of everything that was called.
 
-**Hosted service: [connect.mspbots.ai](https://connect.mspbots.ai)** · Free to use.
+**Hosted service: [connect.mspbots.ai](https://connect.mspbots.ai)**
 
 ### Why Connector
 
@@ -44,7 +44,7 @@ MSPbots Connector gives your AI clients one MCP URL to reach your entire MSP sta
 **Unified gateway**
 - One MCP URL for all your AI clients
 - 150+ connectors across the MSP stack
-- Custom MCP servers supported, free
+- Custom MCP servers supported
 - Authorization happens on each vendor's own page; the AI never sees passwords or tokens
 - Bring your own credentials: use the vendor API keys you already have
 - Multiple accounts per app; connect once, reuse across AI clients
@@ -67,10 +67,6 @@ MSPbots Connector gives your AI clients one MCP URL to reach your entire MSP sta
 - AI clients authenticate with OAuth 2.1 + PKCE
 - Vendor responses are scanned for prompt-injection patterns and returned as structured data. This is one layer of defense, not a guarantee against every attack.
 - Static egress IP for customer firewall and API allowlisting
-
-### Pricing
-
-**Free.**
 
 Links: [connect.mspbots.ai](https://connect.mspbots.ai) · [mspbots.ai](https://mspbots.ai)
 
